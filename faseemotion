@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MEDSPORT - Mobile Precision 9.1</title>
+    <script defer src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js"></script>
+    <style>
+        body { margin: 0; background: #0a0a0a; color: white; font-family: 'Segoe UI', sans-serif; overflow: hidden; height: 100vh; touch-action: none; }
+        
+        #language-screen { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: #0f0f0f; display: flex; flex-direction: column; 
+            justify-content: center; align-items: center; z-index: 200; 
+        }
+        .lang-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 20px; }
+        .lang-btn { 
+            background: #1e1e1e; border: 2px solid #333; color: white; 
+            padding: 20px; border-radius: 20px; font-size: 1rem; 
+            cursor: pointer; width: 160px; font-weight: bold; text-align: center;
+        }
+
+        .container { 
+            display: none; 
+            grid-template-columns: 1fr 2fr 1fr; 
+            grid-template-rows: 1fr 80px 50px;
+            height: 100vh; gap: 8px; padding: 10px; 
+            box-sizing: border-box; 
+        }
+
+        #video-container { 
+            grid-column: 2; position: relative; background: #000; 
+            border-radius: 30px; overflow: hidden; border: 4px solid #1e1e1e; 
+        }
+        video { position: absolute; width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+        
+        .sidebar { display: flex; flex-direction: column; gap: 8px; justify-content: center; }
+        .card { 
+            flex: 1; background: #151515; border-radius: 15px; border: 2px solid #252525; 
+            position: relative; overflow: hidden; display: flex; 
+            flex-direction: column; justify-content: flex-end; padding-bottom: 10px; align-items: center; 
+        }
+        .card.active { border-color: #00ff88; background: #0d1a13; }
+        .card.motion-card { border-style: dashed; }
+        .card.motion-card.active { border-color: #0088ff; background: #0a1622; border-style: solid; }
+
+        .progress-fill { position: absolute; bottom: 0; width: 100%; background: linear-gradient(to top, #0088ff, #00ff88); height: 0%; opacity: 0.15; z-index: 1; }
+        .active .progress-fill { opacity: 0.85; }
+        .max-marker { position: absolute; width: 100%; height: 4px; background: #fff; bottom: 0%; z-index: 2; box-shadow: 0 0 8px #fff; }
+        
+        .label { position: relative; z-index: 3; font-weight: 800; font-size: 0.6rem; text-transform: uppercase; text-align: center; }
+        .emoji { font-size: 1.5rem; display: block; margin-bottom: 2px; }
+
+        #main-score { font-size: 4rem; font-weight: 900; color: #1a1a1a; text-align: center; grid-column: 2; grid-row: 2; align-self: center; }
+        .reset-btn { 
+            grid-column: 2; grid-row: 3; background: transparent; 
+            border: 2px solid #ff4444; color: #ff4444; padding: 8px; 
+            border-radius: 40px; font-weight: bold; cursor: pointer; font-size: 0.8rem;
+        }
+        
+        #loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0a0a0a; display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 300; }
+    </style>
+</head>
+<body>
+
+<div id="language-screen">
+    <h2 style="color: #00ff88; letter-spacing: 4px;">MEDSPORT</h2>
+    <div class="lang-grid">
+        <button class="lang-btn" onclick="selectLanguage('az')">AZ</button>
+        <button class="lang-btn" onclick="selectLanguage('ru')">RU</button>
+        <button class="lang-btn" onclick="selectLanguage('en')">EN</button>
+        <button class="lang-btn" onclick="selectLanguage('tr')">TR</button>
+    </div>
+</div>
+
+<div id="loader"><p>STARTING CAMERA...</p></div>
+
+<div class="container" id="main-container">
+    <div class="sidebar">
+        <div class="card" id="card-happy" onclick="setTarget('happy')"><div class="progress-fill" id="fill-happy"></div><div class="max-marker" id="max-happy"></div><div class="label">😊 <span id="txt-happy">...</span></div></div>
+        <div class="card" id="card-sad" onclick="setTarget('sad')"><div class="progress-fill" id="fill-sad"></div><div class="max-marker" id="max-sad"></div><div class="label">☹️ <span id="txt-sad">...</span></div></div>
+        <div class="card" id="card-surprised" onclick="setTarget('surprised')"><div class="progress-fill" id="fill-surprised"></div><div class="max-marker" id="max-surprised"></div><div class="label">😲 <span id="txt-surprised">...</span></div></div>
+        <div class="card" id="card-angry" onclick="setTarget('angry')"><div class="progress-fill" id="fill-angry"></div><div class="max-marker" id="max-angry"></div><div class="label">😠 <span id="txt-angry">...</span></div></div>
+    </div>
+
+    <div id="video-container"><video id="video" autoplay muted playsinline></video></div>
+
+    <div class="sidebar">
+        <div class="card motion-card" id="card-no" onclick="setTarget('no')"><div class="progress-fill" id="fill-no"></div><div class="max-marker" id="max-no"></div><div class="label">↔️ <span id="txt-no">...</span></div></div>
+        <div class="card motion-card" id="card-yes" onclick="setTarget('yes')"><div class="progress-fill" id="fill-yes"></div><div class="max-marker" id="max-yes"></div><div class="label">↕️ <span id="txt-yes">...</span></div></div>
+        <div class="card motion-card" id="card-roll" onclick="setTarget('roll')"><div class="progress-fill" id="fill-roll"></div><div class="max-marker" id="max-roll"></div><div class="label">🔄 <span id="txt-roll">...</span></div></div>
+    </div>
+
+    <div id="main-score">0%</div>
+    <button class="reset-btn" id="btn-reset" onclick="resetAll()">RESET</button>
+</div>
+
+<script>
+    const languages = {
+        'az': { happy: 'Sevinc', sad: 'Kədər', surprised: 'Təəccüb', angry: 'Qəzəb', no: 'Yox', yes: 'Hə', roll: 'Dövrə', reset: 'SIFIRLA' },
+        'ru': { happy: 'Радость', sad: 'Грусть', surprised: 'Удивление', angry: 'Гнев', no: 'Нет', yes: 'Да', roll: 'Вращение', reset: 'СБРОС' },
+        'en': { happy: 'Joy', sad: 'Sadness', surprised: 'Surprise', angry: 'Anger', no: 'No', yes: 'Yes', roll: 'Roll', reset: 'RESET' },
+        'tr': { happy: 'Sevinç', sad: 'Üzüntü', surprised: 'Şaşkınlık', angry: 'Öfke', no: 'Hayır', yes: 'Evet', roll: 'Dönme', reset: 'SIFIRLA' }
+    };
+
+    let targetEmotion = null;
+    let maxScores = { happy: 0, sad: 0, surprised: 0, angry: 0, no: 0, yes: 0, roll: 0 };
+    let aiInitialized = false;
+    let offsets = { yaw: 0, pitch: 0, roll: 0 };
+    let isCalibrating = true;
+    const GOLDEN_SENS = 0.02;
+
+    async function selectLanguage(lang) {
+        const dict = languages[lang];
+        ['happy', 'sad', 'surprised', 'angry', 'no', 'yes', 'roll'].forEach(k => {
+            const el = document.getElementById(`txt-${k}`);
+            if(el) el.innerText = dict[k];
+        });
+        document.getElementById('btn-reset').innerText = dict.reset;
+        document.getElementById('language-screen').style.display = 'none';
+        
+        if (!aiInitialized) {
+            document.getElementById('loader').style.display = 'flex';
+            await initAI();
+        } else {
+            document.getElementById('main-container').style.display = 'grid';
+        }
+    }
+
+    async function initAI() {
+        try {
+            const URL = 'https://raw.githubusercontent.com/justadudewhohacks/face-api.js/master/weights';
+            await faceapi.nets.tinyFaceDetector.loadFromUri(URL);
+            await faceapi.nets.faceExpressionNet.loadFromUri(URL);
+            await faceapi.nets.faceLandmark68Net.loadFromUri(URL);
+
+            const video = document.getElementById('video');
+            const stream = await navigator.mediaDevices.getUserMedia({ 
+                video: { 
+                    facingMode: "user",
+                    width: { ideal: 640 },
+                    height: { ideal: 480 }
+                } 
+            });
+            
+            video.srcObject = stream;
+            
+            // Принудительный запуск для Android
+            video.onloadedmetadata = () => {
+                video.play();
+                aiInitialized = true;
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('main-container').style.display = 'grid';
+                startAnalysis();
+            };
+        } catch (err) {
+            alert("Ошибка доступа к камере: " + err);
+            document.getElementById('loader').innerHTML = "<p style='color:red'>CAMERA ERROR</p>";
+        }
+    }
+
+    function resetAll() {
+        maxScores = { happy: 0, sad: 0, surprised: 0, angry: 0, no: 0, yes: 0, roll: 0 };
+        Object.keys(maxScores).forEach(key => {
+            const marker = document.getElementById(`max-${key}`);
+            const fill = document.getElementById(`fill-${key}`);
+            if(marker) marker.style.bottom = '0%';
+            if(fill) fill.style.height = '0%';
+        });
+        isCalibrating = true;
+    }
+
+    function setTarget(id) {
+        targetEmotion = id;
+        document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+        document.getElementById(`card-${id}`).classList.add('active');
+    }
+
+    function startAnalysis() {
+        const video = document.getElementById('video');
+        setInterval(async () => {
+            if (!aiInitialized) return;
+
+            const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 160 }))
+                .withFaceLandmarks().withFaceExpressions();
+            
+            if (detections && detections.length > 0) {
+                const land = detections[0].landmarks;
+                const nose = land.getNose();
+                const jaw = land.getJawOutline();
+                const lEye = land.getLeftEye();
+                const rEye = land.getRightEye();
+
+                const rYaw = (nose[0].x - (jaw[0].x + jaw[16].x)/2);
+                const rPitch = (nose[3].y - (lEye[0].y + rEye[3].y)/2);
+                const rRoll = (lEye[0].y - rEye[3].y);
+
+                if (isCalibrating) {
+                    offsets = { yaw: rYaw, pitch: rPitch, roll: rRoll };
+                    isCalibrating = false;
+                }
+
+                const motions = {
+                    'no': Math.abs(rYaw - offsets.yaw) * GOLDEN_SENS,
+                    'yes': Math.abs(rPitch - offsets.pitch) * GOLDEN_SENS,
+                    'roll': Math.abs(rRoll - offsets.roll) * GOLDEN_SENS
+                };
+
+                const expr = detections[0].expressions;
+
+                ['happy', 'sad', 'surprised', 'angry', 'no', 'yes', 'roll'].forEach(id => {
+                    let val = (['no', 'yes', 'roll'].includes(id)) ? motions[id] : expr[id];
+                    const deadZone = 0.08; 
+                    if (val < deadZone) val = 0;
+                    else val = (val - deadZone) / (1 - deadZone);
+
+                    let result = Math.min(100, Math.round(val * 100));
+
+                    const fill = document.getElementById(`fill-${id}`);
+                    const marker = document.getElementById(`max-${id}`);
+
+                    if(fill) fill.style.height = result + '%';
+                    if (result > maxScores[id] && marker) {
+                        maxScores[id] = result;
+                        marker.style.bottom = result + '%';
+                    }
+
+                    if (id === targetEmotion) {
+                        const disp = document.getElementById('main-score');
+                        disp.innerText = result + '%';
+                        disp.style.color = `hsl(${result * 1.2}, 100%, 50%)`;
+                    }
+                });
+            }
+        }, 200); // Чуть увеличил интервал для стабильности мобильных ЦПУ
+    }
+</script>
+</body>
+</html>
