@@ -3,84 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MEDSPORT - Full System 9.5</title>
+    <title>MEDSPORT - Landscape Only 9.7</title>
     <script defer src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js"></script>
     <style>
         body { margin: 0; background: #000; color: #fff; font-family: 'Segoe UI', sans-serif; overflow: hidden; height: 100vh; width: 100vw; touch-action: none; }
         
+        /* ЗАГЛУШКА ДЛЯ ВЕРТИКАЛЬНОГО РЕЖИМА */
+        #portrait-warning {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #050505; z-index: 1000; flex-direction: column; justify-content: center; align-items: center; text-align: center;
+        }
+        @media (orientation: portrait) {
+            #portrait-warning { display: flex; }
+            #main-container, #language-screen { display: none !important; }
+        }
+        .rotate-icon { font-size: 4rem; animation: rotateAnim 2s infinite; margin-bottom: 20px; }
+        @keyframes rotateAnim { 0% { transform: rotate(0deg); } 50% { transform: rotate(-90deg); } 100% { transform: rotate(0deg); } }
+
         /* ЭКРАН ВЫБОРА ЯЗЫКА */
         #language-screen { 
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
             background: #080808; display: flex; flex-direction: column; 
             justify-content: center; align-items: center; z-index: 500; 
         }
-        .lang-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 90%; max-width: 500px; }
+        .lang-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 90%; max-width: 450px; }
         .lang-btn { 
-            background: #111; border: 3px solid #333; color: white; 
-            padding: 25px; border-radius: 20px; font-size: 1.4rem; 
-            cursor: pointer; font-weight: 900; transition: 0.3s;
+            background: #111; border: 2px solid #333; color: white; 
+            padding: 20px; border-radius: 15px; font-size: 1.2rem; 
+            cursor: pointer; font-weight: 900;
         }
-        .lang-btn:hover { border-color: #00ffff; box-shadow: 0 0 15px #00ffff; }
 
-        /* ОСНОВНОЙ КОНТЕЙНЕР */
+        /* ОСНОВНОЙ ИНТЕРФЕЙС (ГОРИЗОНТАЛЬНЫЙ) */
         .super-container { 
             display: none; 
-            grid-template-columns: 260px 1fr 260px; 
-            grid-template-rows: 50px 1fr 90px;
-            width: 100vw; height: 100vh; gap: 10px; padding: 10px; box-sizing: border-box; 
+            grid-template-columns: 240px 1fr 240px; 
+            grid-template-rows: 40px 1fr 90px;
+            width: 100vw; height: 100vh; gap: 10px; padding: 15px; box-sizing: border-box; 
         }
 
         header { grid-column: 1 / -1; display: flex; justify-content: center; align-items: center; }
-        header h1 { color: #00ffff; letter-spacing: 4px; font-size: 1.8rem; margin: 0; text-shadow: 0 0 10px #00ffff; }
+        header h1 { color: #00ffff; letter-spacing: 4px; font-size: 1.5rem; margin: 0; text-shadow: 0 0 10px #00ffff; }
 
-        .panel { display: flex; flex-direction: column; gap: 8px; justify-content: center; }
+        .panel { display: flex; flex-direction: column; gap: 6px; justify-content: center; }
 
         .item-card { 
-            display: grid; grid-template-columns: 45px 1fr; grid-template-rows: 20px 14px; 
-            align-items: center; gap: 0 10px; padding: 10px 12px; background: #0c0c0c; border-radius: 15px; border: 2px solid #222; 
-            cursor: pointer; transition: 0.2s; position: relative;
+            display: grid; grid-template-columns: 40px 1fr; grid-template-rows: 18px 12px; 
+            align-items: center; gap: 0 8px; padding: 10px; background: #0c0c0c; border-radius: 12px; border: 2px solid #222; 
+            cursor: pointer; position: relative;
         }
-        .item-card.active { border-color: #00ffff; box-shadow: 0 0 12px rgba(0,255,255,0.4); background: #001515; }
-        .item-card.motion-item.active { border-color: #ff00ff; box-shadow: 0 0 12px rgba(255,0,255,0.4); background: #150015; }
+        .item-card.active { border-color: #00ffff; box-shadow: 0 0 10px rgba(0,255,255,0.4); background: #001515; }
+        .item-card.motion-item.active { border-color: #ff00ff; box-shadow: 0 0 10px rgba(255,0,255,0.4); background: #150015; }
 
-        .item-emoji { grid-row: 1 / -1; font-size: 2rem; text-align: center; }
-        .item-name { font-weight: 800; font-size: 0.85rem; text-transform: uppercase; color: #aaa; }
+        .item-emoji { grid-row: 1 / -1; font-size: 1.8rem; text-align: center; }
+        .item-name { font-weight: 800; font-size: 0.75rem; text-transform: uppercase; color: #888; }
 
-        .progress-bar-container { grid-column: 2; height: 6px; background: #1a1a1a; border-radius: 3px; position: relative; overflow: visible; margin-top: 4px; }
-        .progress-bar-fill { position: absolute; height: 100%; top: 0; left: 0; background: #00ffff; width: 0%; border-radius: 3px; z-index: 1; }
+        .progress-bar-container { grid-column: 2; height: 5px; background: #1a1a1a; border-radius: 3px; position: relative; margin-top: 3px; }
+        .progress-bar-fill { position: absolute; height: 100%; top: 0; left: 0; background: #00ffff; width: 0%; border-radius: 3px; }
         .motion-item .progress-bar-fill { background: #ff00ff; }
         
         .record-marker { 
-            position: absolute; width: 3px; height: 14px; background: #fff; 
-            top: -4px; left: 0%; transition: left 0.3s; z-index: 2; box-shadow: 0 0 8px #fff; 
+            position: absolute; width: 3px; height: 12px; background: #fff; 
+            top: -4px; left: 0%; transition: left 0.2s; z-index: 2; box-shadow: 0 0 5px #fff; 
         }
 
         #video-container { 
             grid-column: 2; grid-row: 2; display: flex; justify-content: center; align-items: center; 
-            position: relative; background: #000; border-radius: 25px; overflow: hidden; border: 3px solid #1a1a1a; 
+            position: relative; background: #000; border-radius: 20px; overflow: hidden; border: 2px solid #1a1a1a; 
         }
         video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
 
         footer { grid-column: 1 / -1; grid-row: 3; display: grid; grid-template-columns: 1fr 200px 1fr; align-items: center; }
         
-        .sys-btn { background: transparent; padding: 12px; border-radius: 30px; font-weight: 900; cursor: pointer; text-transform: uppercase; font-size: 0.75rem; }
-        .reset-btn { border: 2px solid #ff4444; color: #ff4444; width: 220px; }
-        .full-btn { border: 2px solid #444; color: #666; justify-self: end; width: 140px; }
+        .sys-btn { background: #000; padding: 10px; border-radius: 25px; font-weight: 900; cursor: pointer; text-transform: uppercase; font-size: 0.7rem; }
+        .reset-btn { border: 2px solid #ff4444; color: #ff4444; width: 100%; max-width: 180px; }
+        .full-btn { border: 2px solid #00ffff; color: #00ffff; width: 100%; margin-top: 5px; }
 
         #score-frame { 
             grid-column: 2; display: flex; justify-content: center; align-items: center; 
-            height: 70px; background: #000; border: 3px solid #00ffff; border-radius: 18px; 
-            box-shadow: 0 0 15px rgba(0,255,255,0.3); 
+            height: 60px; background: #000; border: 2px solid #00ffff; border-radius: 15px; 
         }
-        #main-score { font-size: 3.5rem; font-weight: 900; color: #fff; }
+        #main-score { font-size: 2.8rem; font-weight: 900; color: #fff; }
 
         #loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 600; }
     </style>
 </head>
 <body>
 
+<div id="portrait-warning">
+    <div class="rotate-icon">📱🔄</div>
+    <h2>ПОЖАЛУЙСТА, ПОВЕРНИТЕ ТЕЛЕФОН</h2>
+    <p>Для работы MEDSPORT необходим ландшафтный режим</p>
+</div>
+
 <div id="language-screen">
-    <h1 style="color: #00ffff; letter-spacing: 6px; margin-bottom: 30px;">MEDSPORT</h1>
+    <h1 style="color: #00ffff; letter-spacing: 6px; margin-bottom: 20px;">MEDSPORT</h1>
     <div class="lang-grid">
         <button class="lang-btn" onclick="selectLanguage('az')">AZ</button>
         <button class="lang-btn" onclick="selectLanguage('ru')">RU</button>
@@ -128,18 +144,19 @@
             <div class="item-emoji">🔄</div><div class="item-name" id="txt-roll">Вращение</div>
             <div class="progress-bar-container"><div class="progress-bar-fill" id="fill-roll"></div><div class="record-marker" id="mark-roll"></div></div>
         </div>
+        <button class="sys-btn full-btn" onclick="toggleFullScreen()">FULL SCREEN</button>
     </aside>
 
     <footer>
-        <button class="sys-btn reset-btn" id="btn-reset" onclick="resetAll()">СБРОСИТЬ РЕКОРДЫ</button>
+        <button class="sys-btn reset-btn" id="btn-reset" onclick="resetAll()">СБРОС РЕКОРДОВ</button>
         <div id="score-frame"><div id="main-score">0%</div></div>
-        <button class="sys-btn full-btn" onclick="toggleFullScreen()">FULLSCREEN</button>
+        <div style="text-align: right; color: #444; font-size: 0.6rem;">v9.7 landscape-lock</div>
     </footer>
 </div>
 
 <script>
     const languages = {
-        'az': { happy: 'Sevinc', sad: 'Kədər', surprised: 'Təəccüb', angry: 'Qəzəb', no: 'Yox', yes: 'Hə', roll: 'Dövrə', reset: 'SIFIRLA' },
+        'az': { happy: 'Sevinc', sad: 'Kədər', surprised: 'Təəccüb', angry: 'Qəzəб', no: 'Yox', yes: 'Hə', roll: 'Dövrə', reset: 'SIFIRLA' },
         'ru': { happy: 'Радость', sad: 'Грусть', surprised: 'Удивление', angry: 'Гнев', no: 'Нет', yes: 'Да', roll: 'Вращение', reset: 'СБРОС РЕКОРДОВ' },
         'en': { happy: 'Joy', sad: 'Sadness', surprised: 'Surprise', angry: 'Anger', no: 'No', yes: 'Yes', roll: 'Roll', reset: 'RESET RECORDS' },
         'tr': { happy: 'Sevinç', sad: 'Üzüntü', surprised: 'Şaşkınlık', angry: 'Öfke', no: 'Hayır', yes: 'Evet', roll: 'Dönme', reset: 'SIFIRLA' }
@@ -151,6 +168,11 @@
     const GOLDEN_SENS = 0.02;
 
     async function selectLanguage(lang) {
+        // Попытка заблокировать ориентацию (работает в Fullscreen на Android)
+        if (screen.orientation && screen.orientation.lock) {
+            screen.orientation.lock('landscape').catch(e => console.log("Lock failed"));
+        }
+        
         const dict = languages[lang];
         ['happy', 'sad', 'surprised', 'angry', 'no', 'yes', 'roll'].forEach(k => document.getElementById(`txt-${k}`).innerText = dict[k]);
         document.getElementById('btn-reset').innerText = dict.reset;
@@ -191,8 +213,12 @@
     }
 
     function toggleFullScreen() {
-        if (!document.fullscreenElement) document.documentElement.requestFullscreen();
-        else document.exitFullscreen();
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen();
+            if (screen.orientation && screen.orientation.lock) screen.orientation.lock('landscape');
+        } else {
+            document.exitFullscreen();
+        }
     }
 
     function startAnalysis() {
@@ -210,14 +236,10 @@
 
                 if (isCalibrating) { offsets = { yaw: rYaw, pitch: rPitch, roll: rRoll }; isCalibrating = false; }
 
-                const motions = {
-                    'no': Math.abs(rYaw - offsets.yaw) * GOLDEN_SENS,
-                    'yes': Math.abs(rPitch - offsets.pitch) * GOLDEN_SENS,
-                    'roll': Math.abs(rRoll - offsets.roll) * GOLDEN_SENS
-                };
-
                 ['happy', 'sad', 'surprised', 'angry', 'no', 'yes', 'roll'].forEach(id => {
-                    let val = (['no', 'yes', 'roll'].includes(id)) ? motions[id] : detections[0].expressions[id];
+                    let val = (['no', 'yes', 'roll'].includes(id)) ? 
+                        Math.abs((id==='no'?rYaw:id==='yes'?rPitch:rRoll) - offsets[id==='no'?'yaw':id==='yes'?'pitch':'roll']) * GOLDEN_SENS : 
+                        detections[0].expressions[id];
                     val = (val < 0.08) ? 0 : (val - 0.08) / (1 - 0.08);
                     let result = Math.min(100, Math.round(val * 100));
 
@@ -226,12 +248,7 @@
                         records[id] = result;
                         document.getElementById(`mark-${id}`).style.left = result + '%';
                     }
-
-                    if (id === targetEmotion) {
-                        const disp = document.getElementById('main-score');
-                        disp.innerText = result + '%';
-                        disp.style.color = `hsl(${180 + result}, 100%, 70%)`;
-                    }
+                    if (id === targetEmotion) document.getElementById('main-score').innerText = result + '%';
                 });
             }
         }, 50);
