@@ -2,50 +2,49 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MEDSPORT - Landscape Only 9.7</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>MEDSPORT - Fullscreen 9.8</title>
     <script defer src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js"></script>
     <style>
         body { margin: 0; background: #000; color: #fff; font-family: 'Segoe UI', sans-serif; overflow: hidden; height: 100vh; width: 100vw; touch-action: none; }
         
-        /* ЗАГЛУШКА ДЛЯ ВЕРТИКАЛЬНОГО РЕЖИМА */
+        /* Заглушка для вертикального режима */
         #portrait-warning {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #050505; z-index: 1000; flex-direction: column; justify-content: center; align-items: center; text-align: center;
+            background: #000; z-index: 1000; flex-direction: column; justify-content: center; align-items: center; text-align: center;
         }
         @media (orientation: portrait) {
             #portrait-warning { display: flex; }
             #main-container, #language-screen { display: none !important; }
         }
-        .rotate-icon { font-size: 4rem; animation: rotateAnim 2s infinite; margin-bottom: 20px; }
-        @keyframes rotateAnim { 0% { transform: rotate(0deg); } 50% { transform: rotate(-90deg); } 100% { transform: rotate(0deg); } }
 
-        /* ЭКРАН ВЫБОРА ЯЗЫКА */
+        /* Экран выбора языка */
         #language-screen { 
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
             background: #080808; display: flex; flex-direction: column; 
             justify-content: center; align-items: center; z-index: 500; 
         }
-        .lang-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 90%; max-width: 450px; }
+        .lang-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 85%; max-width: 400px; }
         .lang-btn { 
             background: #111; border: 2px solid #333; color: white; 
-            padding: 20px; border-radius: 15px; font-size: 1.2rem; 
-            cursor: pointer; font-weight: 900;
+            padding: 20px; border-radius: 15px; font-size: 1.2rem; cursor: pointer; font-weight: 900;
         }
 
-        /* ОСНОВНОЙ ИНТЕРФЕЙС (ГОРИЗОНТАЛЬНЫЙ) */
+        /* Сетка интерфейса */
         .super-container { 
             display: none; 
             grid-template-columns: 240px 1fr 240px; 
-            grid-template-rows: 40px 1fr 90px;
-            width: 100vw; height: 100vh; gap: 10px; padding: 15px; box-sizing: border-box; 
+            grid-template-rows: 40px 1fr 80px;
+            width: 100vw; height: 100vh; gap: 8px; padding: 10px; box-sizing: border-box; 
         }
 
         header { grid-column: 1 / -1; display: flex; justify-content: center; align-items: center; }
-        header h1 { color: #00ffff; letter-spacing: 4px; font-size: 1.5rem; margin: 0; text-shadow: 0 0 10px #00ffff; }
+        header h1 { color: #00ffff; letter-spacing: 4px; font-size: 1.4rem; margin: 0; text-shadow: 0 0 10px #00ffff; }
 
         .panel { display: flex; flex-direction: column; gap: 6px; justify-content: center; }
-
         .item-card { 
             display: grid; grid-template-columns: 40px 1fr; grid-template-rows: 18px 12px; 
             align-items: center; gap: 0 8px; padding: 10px; background: #0c0c0c; border-radius: 12px; border: 2px solid #222; 
@@ -60,29 +59,18 @@
         .progress-bar-container { grid-column: 2; height: 5px; background: #1a1a1a; border-radius: 3px; position: relative; margin-top: 3px; }
         .progress-bar-fill { position: absolute; height: 100%; top: 0; left: 0; background: #00ffff; width: 0%; border-radius: 3px; }
         .motion-item .progress-bar-fill { background: #ff00ff; }
-        
-        .record-marker { 
-            position: absolute; width: 3px; height: 12px; background: #fff; 
-            top: -4px; left: 0%; transition: left 0.2s; z-index: 2; box-shadow: 0 0 5px #fff; 
-        }
+        .record-marker { position: absolute; width: 3px; height: 12px; background: #fff; top: -4px; left: 0%; transition: left 0.2s; z-index: 2; box-shadow: 0 0 5px #fff; }
 
-        #video-container { 
-            grid-column: 2; grid-row: 2; display: flex; justify-content: center; align-items: center; 
-            position: relative; background: #000; border-radius: 20px; overflow: hidden; border: 2px solid #1a1a1a; 
-        }
+        #video-container { grid-column: 2; grid-row: 2; display: flex; justify-content: center; align-items: center; background: #000; border-radius: 20px; overflow: hidden; border: 2px solid #1a1a1a; }
         video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
 
-        footer { grid-column: 1 / -1; grid-row: 3; display: grid; grid-template-columns: 1fr 200px 1fr; align-items: center; }
-        
+        footer { grid-column: 1 / -1; grid-row: 3; display: grid; grid-template-columns: 1fr 180px 1fr; align-items: center; }
         .sys-btn { background: #000; padding: 10px; border-radius: 25px; font-weight: 900; cursor: pointer; text-transform: uppercase; font-size: 0.7rem; }
-        .reset-btn { border: 2px solid #ff4444; color: #ff4444; width: 100%; max-width: 180px; }
+        .reset-btn { border: 2px solid #ff4444; color: #ff4444; width: 160px; }
         .full-btn { border: 2px solid #00ffff; color: #00ffff; width: 100%; margin-top: 5px; }
 
-        #score-frame { 
-            grid-column: 2; display: flex; justify-content: center; align-items: center; 
-            height: 60px; background: #000; border: 2px solid #00ffff; border-radius: 15px; 
-        }
-        #main-score { font-size: 2.8rem; font-weight: 900; color: #fff; }
+        #score-frame { grid-column: 2; display: flex; justify-content: center; align-items: center; height: 55px; background: #000; border: 2px solid #00ffff; border-radius: 15px; }
+        #main-score { font-size: 2.5rem; font-weight: 900; color: #fff; }
 
         #loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 600; }
     </style>
@@ -90,9 +78,8 @@
 <body>
 
 <div id="portrait-warning">
-    <div class="rotate-icon">📱🔄</div>
-    <h2>ПОЖАЛУЙСТА, ПОВЕРНИТЕ ТЕЛЕФОН</h2>
-    <p>Для работы MEDSPORT необходим ландшафтный режим</p>
+    <div style="font-size: 4rem;">🔄</div>
+    <h2>ПОВЕРНИТЕ ТЕЛЕФОН</h2>
 </div>
 
 <div id="language-screen">
@@ -103,6 +90,7 @@
         <button class="lang-btn" onclick="selectLanguage('en')">EN</button>
         <button class="lang-btn" onclick="selectLanguage('tr')">TR</button>
     </div>
+    <p style="color: #444; margin-top: 20px; font-size: 0.8rem;">При нажатии включится полноэкранный режим</p>
 </div>
 
 <div id="loader"><p style="color:#00ffff; font-weight:900;">ЗАГРУЗКА AI...</p></div>
@@ -144,19 +132,19 @@
             <div class="item-emoji">🔄</div><div class="item-name" id="txt-roll">Вращение</div>
             <div class="progress-bar-container"><div class="progress-bar-fill" id="fill-roll"></div><div class="record-marker" id="mark-roll"></div></div>
         </div>
-        <button class="sys-btn full-btn" onclick="toggleFullScreen()">FULL SCREEN</button>
+        <button class="sys-btn full-btn" onclick="requestFullScreen()">FULL SCREEN</button>
     </aside>
 
     <footer>
         <button class="sys-btn reset-btn" id="btn-reset" onclick="resetAll()">СБРОС РЕКОРДОВ</button>
         <div id="score-frame"><div id="main-score">0%</div></div>
-        <div style="text-align: right; color: #444; font-size: 0.6rem;">v9.7 landscape-lock</div>
+        <div style="text-align: right; color: #333; font-size: 0.5rem;">v9.8 AUTO-FULL</div>
     </footer>
 </div>
 
 <script>
     const languages = {
-        'az': { happy: 'Sevinc', sad: 'Kədər', surprised: 'Təəccüb', angry: 'Qəzəб', no: 'Yox', yes: 'Hə', roll: 'Dövrə', reset: 'SIFIRLA' },
+        'az': { happy: 'Sevinc', sad: 'Kədər', surprised: 'Təəccüb', angry: 'Qəzəb', no: 'Yox', yes: 'Hə', roll: 'Dövrə', reset: 'SIFIRLA' },
         'ru': { happy: 'Радость', sad: 'Грусть', surprised: 'Удивление', angry: 'Гнев', no: 'Нет', yes: 'Да', roll: 'Вращение', reset: 'СБРОС РЕКОРДОВ' },
         'en': { happy: 'Joy', sad: 'Sadness', surprised: 'Surprise', angry: 'Anger', no: 'No', yes: 'Yes', roll: 'Roll', reset: 'RESET RECORDS' },
         'tr': { happy: 'Sevinç', sad: 'Üzüntü', surprised: 'Şaşkınlık', angry: 'Öfke', no: 'Hayır', yes: 'Evet', roll: 'Dönme', reset: 'SIFIRLA' }
@@ -168,10 +156,8 @@
     const GOLDEN_SENS = 0.02;
 
     async function selectLanguage(lang) {
-        // Попытка заблокировать ориентацию (работает в Fullscreen на Android)
-        if (screen.orientation && screen.orientation.lock) {
-            screen.orientation.lock('landscape').catch(e => console.log("Lock failed"));
-        }
+        // Пытаемся уйти в Fullscreen сразу после клика
+        requestFullScreen();
         
         const dict = languages[lang];
         ['happy', 'sad', 'surprised', 'angry', 'no', 'yes', 'roll'].forEach(k => document.getElementById(`txt-${k}`).innerText = dict[k]);
@@ -179,6 +165,18 @@
         document.getElementById('language-screen').style.display = 'none';
         document.getElementById('loader').style.display = 'flex';
         await initAI();
+    }
+
+    function requestFullScreen() {
+        const doc = window.document.documentElement;
+        const request = doc.requestFullscreen || doc.mozRequestFullScreen || doc.webkitRequestFullScreen || doc.msRequestFullscreen;
+        if (request) {
+            request.call(doc).then(() => {
+                if (screen.orientation && screen.orientation.lock) {
+                    screen.orientation.lock('landscape').catch(e => console.log(e));
+                }
+            }).catch(err => console.log(err));
+        }
     }
 
     async function initAI() {
@@ -197,7 +195,7 @@
                 document.getElementById('main-container').style.display = 'grid';
                 startAnalysis();
             };
-        } catch (err) { alert("Ошибка камеры"); }
+        } catch (err) { alert("Ошибка камеры. Используйте HTTPS."); }
     }
 
     function resetAll() {
@@ -210,15 +208,6 @@
         targetEmotion = id;
         document.querySelectorAll('.item-card').forEach(c => c.classList.remove('active'));
         document.getElementById(`card-${id}`).classList.add('active');
-    }
-
-    function toggleFullScreen() {
-        if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen();
-            if (screen.orientation && screen.orientation.lock) screen.orientation.lock('landscape');
-        } else {
-            document.exitFullscreen();
-        }
     }
 
     function startAnalysis() {
