@@ -2,158 +2,145 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MEDSPORT - Mobile Zoom 9.2</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, orientation=landscape">
+    <title>MEDSPORT - Super UI 9.3</title>
     <script defer src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js"></script>
     <style>
-        body { margin: 0; background: #050505; color: white; font-family: 'Segoe UI', Roboto, sans-serif; overflow: hidden; height: 100vh; touch-action: none; }
+        /* БАЗОВЫЕ СТИЛИ - ТЕМНАЯ ТЕМА И НЕОНОВЫЙ АКЦЕНТ */
+        body { margin: 0; background: #000; color: #fff; font-family: 'Segoe UI', Roboto, Helvetica, sans-serif; overflow: hidden; height: 100vh; width: 100vw; display: flex; justify-content: center; align-items: center; touch-action: none; }
         
-        #language-screen { 
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: #0a0a0a; display: flex; flex-direction: column; 
-            justify-content: center; align-items: center; z-index: 200; 
-        }
-        .lang-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 90%; max-width: 400px; }
-        .lang-btn { 
-            background: #1a1a1a; border: 3px solid #333; color: white; 
-            padding: 25px 10px; border-radius: 25px; font-size: 1.2rem; 
-            cursor: pointer; font-weight: 900; text-align: center; transition: 0.2s;
-        }
-        .lang-btn:active { transform: scale(0.95); border-color: #00ff88; }
-
-        .container { 
-            display: none; 
-            grid-template-columns: 100px 1fr 100px; 
-            grid-template-rows: 1fr 120px 70px;
-            height: 100vh; gap: 10px; padding: 10px; 
-            box-sizing: border-box; 
+        /* ГЛАВНЫЙ КОНТЕЙНЕР - ГОРИЗОНТАЛЬНАЯ СЕТКА КАК НА СКРИНШОТЕ */
+        .super-container { 
+            display: grid; 
+            grid-template-columns: 280px 1fr 280px; 
+            grid-template-rows: 60px 1fr 100px;
+            width: 95vw; height: 95vh; max-width: 1200px; gap: 10px; padding: 10px; box-sizing: border-box; 
         }
 
+        /* ЗАГОЛОВОК */
+        header { grid-column: 1 / -1; display: flex; justify-content: center; align-items: center; border-bottom: 2px solid #222; }
+        header h1 { color: #00ffff; letter-spacing: 5px; font-size: 2rem; margin: 0; text-shadow: 0 0 10px #00ffff; }
+
+        /* ВЫДЕЛЕННЫЕ БЛОКИ ПО БОКАМ */
+        .panel { display: flex; flex-direction: column; gap: 8px; justify-content: center; padding: 10px; background: rgba(20,20,20,0.5); border-radius: 20px; border: 1px solid #333; }
+
+        /* СТИЛИЗАЦИЯ КАРТОЧЕК (ЭМОЦИИ И ДВИЖЕНИЯ) */
+        .item-card { 
+            display: grid; grid-template-columns: 50px 1fr; grid-template-rows: 24px 16px; 
+            align-items: center; gap: x 10px; padding: 8px 15px; background: #111; border-radius: 15px; border: 2px solid #222; 
+            cursor: pointer; transition: 0.2s; position: relative;
+        }
+        
+        /* ЭФФЕКТ АКТИВАЦИИ (НЕОНОВОЕ СВЕЧЕНИЕ) */
+        .item-card.active { border-color: #00ffff; box-shadow: 0 0 15px rgba(0,255,255,0.7); background: #001a1a; }
+        .item-card.motion-item.active { border-color: #ff00ff; box-shadow: 0 0 15px rgba(255,0,255,0.7); background: #1a001a; }
+
+        /* ИКОНКИ И ТЕКСТ */
+        .item-emoji { grid-row: 1 / -1; font-size: 2.2rem; text-align: center; }
+        .item-name { font-weight: 800; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; color: #ccc; }
+        .active .item-name { color: #fff; }
+
+        /* ГОРИЗОНТАЛЬНЫЙ ПРОГРЕСС-БАР КАК НА СКРИНШОТЕ */
+        .progress-bar-container { grid-column: 2; height: 8px; background: #222; border-radius: 4px; overflow: hidden; position: relative; }
+        .progress-bar-fill { position: absolute; height: 100%; top: 0; left: 0; background: #00ffff; width: 0%; transition: width 0.1s linear; }
+        .motion-item .progress-bar-fill { background: #ff00ff; }
+        .active .progress-bar-fill { box-shadow: 0 0 10px #00ffff; }
+        .motion-item.active .progress-bar-fill { box-shadow: 0 0 10px #ff00ff; }
+
+        /* ВИДЕО (КОМПАКТНОЕ И В ЦЕНТРЕ) */
         #video-container { 
-            grid-column: 2; position: relative; background: #000; 
-            border-radius: 35px; overflow: hidden; border: 5px solid #222; 
+            grid-column: 2; grid-row: 2; display: flex; justify-content: center; align-items: center; 
+            position: relative; background: #000; border-radius: 30px; overflow: hidden; border: 4px solid #222; 
         }
-        video { position: absolute; width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
-        
-        .sidebar { display: flex; flex-direction: column; gap: 10px; justify-content: space-between; height: 100%; }
-        
-        .card { 
-            flex: 1; background: #111; border-radius: 20px; border: 3px solid #222; 
-            position: relative; overflow: hidden; display: flex; 
-            flex-direction: column; justify-content: center; align-items: center;
-            transition: 0.2s;
-        }
-        .card.active { border-color: #00ff88; background: #0a1a11; box-shadow: 0 0 15px rgba(0,255,136,0.3); }
-        .card.motion-card { border-style: dashed; }
-        .card.motion-card.active { border-color: #0088ff; background: #05101a; border-style: solid; box-shadow: 0 0 15px rgba(0,136,255,0.3); }
+        video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
 
-        .progress-fill { position: absolute; bottom: 0; width: 100%; background: linear-gradient(to top, #0088ff, #00ff88); height: 0%; opacity: 0.2; z-index: 1; }
-        .active .progress-fill { opacity: 0.9; }
-        .max-marker { position: absolute; width: 100%; height: 6px; background: #fff; bottom: 0%; z-index: 2; box-shadow: 0 0 10px #fff; transition: bottom 0.3s; }
+        /* НИЖНЯЯ ПАНЕЛЬ С БАЛЛОМ */
+        footer { grid-column: 1 / -1; grid-row: 3; display: grid; grid-template-columns: 1fr 200px 1fr; align-items: center; gap: 20px; }
         
-        .label { position: relative; z-index: 3; font-weight: 900; font-size: 0.8rem; text-transform: uppercase; text-align: center; color: #eee; line-height: 1.2; }
-        .emoji { font-size: 2.8rem; display: block; margin-bottom: 5px; }
+        /* КНОПКИ ДЛЯ МОБИЛЬНЫХ */
+        .sys-btn { background: transparent; padding: 10px 20px; border-radius: 30px; font-weight: 900; cursor: pointer; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px; transition: 0.2s; }
+        .reset-btn { border: 2px solid #ff4444; color: #ff4444; }
+        .reset-btn:active { background: #ff4444; color: #fff; }
+        .full-btn { border: 2px solid #444; color: #888; grid-column: 3; justify-self: end; }
 
-        #main-score { font-size: 5rem; font-weight: 900; color: #151515; text-align: center; grid-column: 2; grid-row: 2; align-self: center; letter-spacing: -2px; }
-        
-        .reset-btn { 
-            grid-column: 2; grid-row: 3; background: #1a0505; 
-            border: 3px solid #ff4444; color: #ff4444; padding: 12px; 
-            border-radius: 50px; font-weight: 900; cursor: pointer; font-size: 1.1rem;
-            text-transform: uppercase; letter-spacing: 2px;
+        /* ГЛАВНЫЙ СЧЕТЧИК БАЛЛОВ В СВЕТЯЩЕЙСЯ РАМКЕ */
+        #score-frame { 
+            grid-column: 2; display: flex; justify-content: center; align-items: center; 
+            height: 80px; background: #000; border: 3px solid #00ffff; border-radius: 20px; 
+            box-shadow: 0 0 20px rgba(0,255,255,0.5); 
         }
-        
-        #loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 300; }
-        #loader p { font-weight: 900; color: #00ff88; letter-spacing: 3px; }
+        #main-score { font-size: 4rem; font-weight: 900; color: #fff; text-shadow: 0 0 15px #00ffff; letter-spacing: -3px; }
+
+        /* ЛОАДЕР И ОШИБКИ */
+        #loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 300; }
+        #loader p { font-weight: 900; color: #00ffff; letter-spacing: 3px; font-size: 1.2rem; text-shadow: 0 0 10px #00ffff; }
     </style>
 </head>
 <body>
 
-<div id="language-screen">
-    <h1 style="color: #00ff88; letter-spacing: 8px; margin-bottom: 30px; font-size: 2.5rem;">MEDSPORT</h1>
-    <div class="lang-grid">
-        <button class="lang-btn" onclick="selectLanguage('az')">AZ</button>
-        <button class="lang-btn" onclick="selectLanguage('ru')">RU</button>
-        <button class="lang-btn" onclick="selectLanguage('en')">EN</button>
-        <button class="lang-btn" onclick="selectLanguage('tr')">TR</button>
-    </div>
-</div>
+<div id="loader"><p>ИНИЦИАЛИЗАЦИЯ СУПЕР UI...</p></div>
 
-<div id="loader"><p>LOADING AI...</p></div>
+<div class="super-container" id="main-container" style="display: none;">
+    <header><h1>MEDSPORT</h1></header>
 
-<div class="container" id="main-container">
-    <div class="sidebar">
-        <div class="card" id="card-happy" onclick="setTarget('happy')">
-            <div class="progress-fill" id="fill-happy"></div><div class="max-marker" id="max-happy"></div>
-            <div class="label"><span class="emoji">😊</span><span id="txt-happy">...</span></div>
+    <aside class="panel">
+        <div class="item-card" id="card-happy" onclick="setTarget('happy')">
+            <div class="item-emoji">😊</div><div class="item-name">Радость</div>
+            <div class="progress-bar-container"><div class="progress-bar-fill" id="fill-happy"></div></div>
         </div>
-        <div class="card" id="card-sad" onclick="setTarget('sad')">
-            <div class="progress-fill" id="fill-sad"></div><div class="max-marker" id="max-sad"></div>
-            <div class="label"><span class="emoji">☹️</span><span id="txt-sad">...</span></div>
+        <div class="item-card" id="card-sad" onclick="setTarget('sad')">
+            <div class="item-emoji">☹️</div><div class="item-name">Грусть</div>
+            <div class="progress-bar-container"><div class="progress-bar-fill" id="fill-sad"></div></div>
         </div>
-        <div class="card" id="card-surprised" onclick="setTarget('surprised')">
-            <div class="progress-fill" id="fill-surprised"></div><div class="max-marker" id="max-surprised"></div>
-            <div class="label"><span class="emoji">😲</span><span id="txt-surprised">...</span></div>
+        <div class="item-card" id="card-surprised" onclick="setTarget('surprised')">
+            <div class="item-emoji">😲</div><div class="item-name">Удивление</div>
+            <div class="progress-bar-container"><div class="progress-bar-fill" id="fill-surprised"></div></div>
         </div>
-        <div class="card" id="card-angry" onclick="setTarget('angry')">
-            <div class="progress-fill" id="fill-angry"></div><div class="max-marker" id="max-angry"></div>
-            <div class="label"><span class="emoji">😠</span><span id="txt-angry">...</span></div>
+        <div class="item-card" id="card-angry" onclick="setTarget('angry')">
+            <div class="item-emoji">😠</div><div class="item-name">Гнев</div>
+            <div class="progress-bar-container"><div class="progress-bar-fill" id="fill-angry"></div></div>
         </div>
-    </div>
+    </aside>
 
     <div id="video-container"><video id="video" autoplay muted playsinline></video></div>
 
-    <div class="sidebar">
-        <div class="card motion-card" id="card-no" onclick="setTarget('no')">
-            <div class="progress-fill" id="fill-no"></div><div class="max-marker" id="max-no"></div>
-            <div class="label"><span class="emoji">↔️</span><span id="txt-no">...</span></div>
+    <aside class="panel">
+        <div class="item-card motion-item" id="card-no" onclick="setTarget('no')">
+            <div class="item-emoji">↔️</div><div class="item-name">Нет</div>
+            <div class="progress-bar-container"><div class="progress-bar-fill" id="fill-no"></div></div>
         </div>
-        <div class="card motion-card" id="card-yes" onclick="setTarget('yes')">
-            <div class="progress-fill" id="fill-yes"></div><div class="max-marker" id="max-yes"></div>
-            <div class="label"><span class="emoji">↕️</span><span id="txt-yes">...</span></div>
+        <div class="item-card motion-item" id="card-yes" onclick="setTarget('yes')">
+            <div class="item-emoji">↕️</div><div class="item-name">Да</div>
+            <div class="progress-bar-container"><div class="progress-bar-fill" id="fill-yes"></div></div>
         </div>
-        <div class="card motion-card" id="card-roll" onclick="setTarget('roll')">
-            <div class="progress-fill" id="fill-roll"></div><div class="max-marker" id="max-roll"></div>
-            <div class="label"><span class="emoji">🔄</span><span id="txt-roll">...</span></div>
+        <div class="item-card motion-item" id="card-roll" onclick="setTarget('roll')">
+            <div class="item-emoji">🔄</div><div class="item-name">Вращение</div>
+            <div class="progress-bar-container"><div class="progress-bar-fill" id="fill-roll"></div></div>
         </div>
-    </div>
+    </aside>
 
-    <div id="main-score">0%</div>
-    <button class="reset-btn" id="btn-reset" onclick="resetAll()">RESET</button>
+    <footer>
+        <button class="sys-btn reset-btn" onclick="resetAll()">СБРОС И КАЛИБРОВКА</button>
+        <div id="score-frame"><div id="main-score">0%</div></div>
+        <button class="sys-btn full-btn" onclick="toggleFullScreen()">FULLSCREEN</button>
+    </footer>
 </div>
 
 <script>
-    const languages = {
-        'az': { happy: 'Sevinc', sad: 'Kədər', surprised: 'Təəccüb', angry: 'Qəzəb', no: 'Yox', yes: 'Hə', roll: 'Dövrə', reset: 'SIFIRLA' },
-        'ru': { happy: 'Радость', sad: 'Грусть', surprised: 'Удивление', angry: 'Гнев', no: 'Нет', yes: 'Да', roll: 'Вращение', reset: 'СБРОС' },
-        'en': { happy: 'Joy', sad: 'Sadness', surprised: 'Surprise', angry: 'Anger', no: 'No', yes: 'Yes', roll: 'Roll', reset: 'RESET' },
-        'tr': { happy: 'Sevinç', sad: 'Üzüntü', surprised: 'Şaşkınlık', angry: 'Öfke', no: 'Hayır', yes: 'Evet', roll: 'Dönme', reset: 'SIFIRLA' }
-    };
-
+    // ПАРАМЕТРЫ И ФЛАГИ
     let targetEmotion = null;
-    let maxScores = { happy: 0, sad: 0, surprised: 0, angry: 0, no: 0, yes: 0, roll: 0 };
     let aiInitialized = false;
     let offsets = { yaw: 0, pitch: 0, roll: 0 };
     let isCalibrating = true;
-    const GOLDEN_SENS = 0.02;
+    const GOLDEN_SENS = 0.02; // Ваше эталонное значение
 
-    async function selectLanguage(lang) {
-        const dict = languages[lang];
-        ['happy', 'sad', 'surprised', 'angry', 'no', 'yes', 'roll'].forEach(k => {
-            const el = document.getElementById(`txt-${k}`);
-            if(el) el.innerText = dict[k];
-        });
-        document.getElementById('btn-reset').innerText = dict.reset;
-        document.getElementById('language-screen').style.display = 'none';
-        
-        if (!aiInitialized) {
-            document.getElementById('loader').style.display = 'flex';
-            await initAI();
-        } else {
-            document.getElementById('main-container').style.display = 'grid';
-        }
-    }
+    // АВТОМАТИЧЕСКИЙ ЗАПУСК (БЕЗ ВЫБОРА ЯЗЫКА)
+    window.onload = async () => {
+        document.getElementById('loader').style.display = 'flex';
+        await initAI();
+    };
 
+    // ИНИЦИАЛИЗАЦИЯ НЕЙРОСЕТИ И КАМЕРЫ (АДАПТИРОВАНО ДЛЯ ANDROID)
     async function initAI() {
         try {
             const URL = 'https://raw.githubusercontent.com/justadudewhohacks/face-api.js/master/weights';
@@ -163,7 +150,8 @@
 
             const video = document.getElementById('video');
             const stream = await navigator.mediaDevices.getUserMedia({ 
-                video: { facingMode: "user" } 
+                video: { facingMode: "user", width: { ideal: 640 }, height: { ideal: 480 } },
+                audio: false
             });
             
             video.srcObject = stream;
@@ -175,27 +163,39 @@
                 startAnalysis();
             };
         } catch (err) {
-            alert("Камера недоступна. Используйте HTTPS или Chrome.");
+            alert("ОШИБКА: Доступ к камере запрещен или заблокирован другим приложением. Используйте HTTPS в Chrome на Android.");
+            document.getElementById('loader').innerHTML = "<p style='color:red; text-shadow: 0 0 10px red;'>ОШИБКА КАМЕРЫ</p>";
         }
     }
 
+    // СБРОС И КАЛИБРОВКА НУЛЯ
     function resetAll() {
-        maxScores = { happy: 0, sad: 0, surprised: 0, angry: 0, no: 0, yes: 0, roll: 0 };
-        Object.keys(maxScores).forEach(key => {
-            const marker = document.getElementById(`max-${key}`);
-            const fill = document.getElementById(`fill-${key}`);
-            if(marker) marker.style.bottom = '0%';
-            if(fill) fill.style.height = '0%';
-        });
         isCalibrating = true;
+        document.getElementById('main-score').innerText = '0%';
+        document.getElementById('main-score').style.color = '#fff';
     }
 
+    // ВЫБОР ЦЕЛИ УПРАЖНЕНИЯ
     function setTarget(id) {
         targetEmotion = id;
-        document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('.item-card').forEach(c => c.classList.remove('active'));
         document.getElementById(`card-${id}`).classList.add('active');
     }
 
+    // ПОЛНОЭКРАННЫЙ РЕЖИМ (КРИТИЧНО ДЛЯ МОБИЛЬНЫХ)
+    function toggleFullScreen() {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(err => {
+                alert(`Ошибка перехода в Fullscreen: ${err.message}`);
+            });
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            }
+        }
+    }
+
+    // ЦИКЛ АНАЛИЗА (30 РАЗ В СЕКУНДУ)
     function startAnalysis() {
         const video = document.getElementById('video');
         setInterval(async () => {
@@ -215,11 +215,13 @@
                 const rPitch = (nose[3].y - (lEye[0].y + rEye[3].y)/2);
                 const rRoll = (lEye[0].y - rEye[3].y);
 
+                // КАЛИБРОВКА НУЛЕВОЙ ТОЧКИ
                 if (isCalibrating) {
                     offsets = { yaw: rYaw, pitch: rPitch, roll: rRoll };
                     isCalibrating = false;
                 }
 
+                // РАСЧЕТ ДВИЖЕНИЙ С ЭТАЛОННОЙ ЧУВСТВИТЕЛЬНОСТЬЮ 0.02
                 const motions = {
                     'no': Math.abs(rYaw - offsets.yaw) * GOLDEN_SENS,
                     'yes': Math.abs(rPitch - offsets.pitch) * GOLDEN_SENS,
@@ -228,31 +230,31 @@
 
                 const expr = detections[0].expressions;
 
+                // ОБНОВЛЕНИЕ ШКАЛ И СЧЕТЧИКА
                 ['happy', 'sad', 'surprised', 'angry', 'no', 'yes', 'roll'].forEach(id => {
                     let val = (['no', 'yes', 'roll'].includes(id)) ? motions[id] : expr[id];
+                    
                     const deadZone = 0.08; 
                     if (val < deadZone) val = 0;
                     else val = (val - deadZone) / (1 - deadZone);
 
                     let result = Math.min(100, Math.round(val * 100));
 
+                    // Обновляем горизонтальный прогресс-бар
                     const fill = document.getElementById(`fill-${id}`);
-                    const marker = document.getElementById(`max-${id}`);
+                    if(fill) fill.style.width = result + '%';
 
-                    if(fill) fill.style.height = result + '%';
-                    if (result > maxScores[id] && marker) {
-                        maxScores[id] = result;
-                        marker.style.bottom = result + '%';
-                    }
-
+                    // Обновляем главный неоновый счетчик внизу
                     if (id === targetEmotion) {
                         const disp = document.getElementById('main-score');
                         disp.innerText = result + '%';
-                        disp.style.color = `hsl(${result * 1.2}, 100%, 50%)`;
+                        // Плавное изменение цвета неона от голубого к зеленому
+                        disp.style.textShadow = `0 0 15px hsl(${180 + result * 1.2}, 100%, 50%)`;
+                        document.getElementById('score-frame').style.borderColor = `hsl(${180 + result * 1.2}, 100%, 50%)`;
                     }
                 });
             }
-        }, 150);
+        }, 33); // Частота обновления 30 FPS
     }
 </script>
 </body>
