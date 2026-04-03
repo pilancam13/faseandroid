@@ -3,46 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MEDSPORT - Record Fix 9.4</title>
+    <title>MEDSPORT - Full System 9.5</title>
     <script defer src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js"></script>
     <style>
-        body { margin: 0; background: #000; color: #fff; font-family: 'Segoe UI', sans-serif; overflow: hidden; height: 100vh; width: 100vw; display: flex; justify-content: center; align-items: center; touch-action: none; }
+        body { margin: 0; background: #000; color: #fff; font-family: 'Segoe UI', sans-serif; overflow: hidden; height: 100vh; width: 100vw; touch-action: none; }
         
+        /* ЭКРАН ВЫБОРА ЯЗЫКА */
+        #language-screen { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: #080808; display: flex; flex-direction: column; 
+            justify-content: center; align-items: center; z-index: 500; 
+        }
+        .lang-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 90%; max-width: 500px; }
+        .lang-btn { 
+            background: #111; border: 3px solid #333; color: white; 
+            padding: 25px; border-radius: 20px; font-size: 1.4rem; 
+            cursor: pointer; font-weight: 900; transition: 0.3s;
+        }
+        .lang-btn:hover { border-color: #00ffff; box-shadow: 0 0 15px #00ffff; }
+
+        /* ОСНОВНОЙ КОНТЕЙНЕР */
         .super-container { 
-            display: grid; 
+            display: none; 
             grid-template-columns: 260px 1fr 260px; 
             grid-template-rows: 50px 1fr 90px;
-            width: 98vw; height: 96vh; gap: 10px; padding: 10px; box-sizing: border-box; 
+            width: 100vw; height: 100vh; gap: 10px; padding: 10px; box-sizing: border-box; 
         }
 
         header { grid-column: 1 / -1; display: flex; justify-content: center; align-items: center; }
-        header h1 { color: #00ffff; letter-spacing: 4px; font-size: 1.8rem; margin: 0; text-shadow: 0 0 10px #00ffff; opacity: 0.8; }
+        header h1 { color: #00ffff; letter-spacing: 4px; font-size: 1.8rem; margin: 0; text-shadow: 0 0 10px #00ffff; }
 
-        .panel { display: flex; flex-direction: column; gap: 6px; justify-content: center; }
+        .panel { display: flex; flex-direction: column; gap: 8px; justify-content: center; }
 
         .item-card { 
             display: grid; grid-template-columns: 45px 1fr; grid-template-rows: 20px 14px; 
             align-items: center; gap: 0 10px; padding: 10px 12px; background: #0c0c0c; border-radius: 15px; border: 2px solid #222; 
             cursor: pointer; transition: 0.2s; position: relative;
         }
-        
         .item-card.active { border-color: #00ffff; box-shadow: 0 0 12px rgba(0,255,255,0.4); background: #001515; }
         .item-card.motion-item.active { border-color: #ff00ff; box-shadow: 0 0 12px rgba(255,0,255,0.4); background: #150015; }
 
         .item-emoji { grid-row: 1 / -1; font-size: 2rem; text-align: center; }
         .item-name { font-weight: 800; font-size: 0.85rem; text-transform: uppercase; color: #aaa; }
-        .active .item-name { color: #fff; }
 
-        /* ШКАЛА С МАРКЕРОМ РЕКОРДА */
         .progress-bar-container { grid-column: 2; height: 6px; background: #1a1a1a; border-radius: 3px; position: relative; overflow: visible; margin-top: 4px; }
-        .progress-bar-fill { position: absolute; height: 100%; top: 0; left: 0; background: #00ffff; width: 0%; border-radius: 3px; transition: width 0.1s linear; z-index: 1; }
+        .progress-bar-fill { position: absolute; height: 100%; top: 0; left: 0; background: #00ffff; width: 0%; border-radius: 3px; z-index: 1; }
         .motion-item .progress-bar-fill { background: #ff00ff; }
         
-        /* ТОТ САМЫЙ МАРКЕР РЕКОРДА */
         .record-marker { 
             position: absolute; width: 3px; height: 14px; background: #fff; 
-            top: -4px; left: 0%; transition: left 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-            z-index: 2; box-shadow: 0 0 8px #fff; border-radius: 2px;
+            top: -4px; left: 0%; transition: left 0.3s; z-index: 2; box-shadow: 0 0 8px #fff; 
         }
 
         #video-container { 
@@ -51,11 +61,10 @@
         }
         video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
 
-        footer { grid-column: 1 / -1; grid-row: 3; display: grid; grid-template-columns: 1fr 180px 1fr; align-items: center; }
+        footer { grid-column: 1 / -1; grid-row: 3; display: grid; grid-template-columns: 1fr 200px 1fr; align-items: center; }
         
-        .sys-btn { background: transparent; padding: 12px; border-radius: 30px; font-weight: 900; cursor: pointer; text-transform: uppercase; font-size: 0.75rem; transition: 0.2s; }
+        .sys-btn { background: transparent; padding: 12px; border-radius: 30px; font-weight: 900; cursor: pointer; text-transform: uppercase; font-size: 0.75rem; }
         .reset-btn { border: 2px solid #ff4444; color: #ff4444; width: 220px; }
-        .reset-btn:active { background: #ff4444; color: #fff; }
         .full-btn { border: 2px solid #444; color: #666; justify-self: end; width: 140px; }
 
         #score-frame { 
@@ -63,46 +72,44 @@
             height: 70px; background: #000; border: 3px solid #00ffff; border-radius: 18px; 
             box-shadow: 0 0 15px rgba(0,255,255,0.3); 
         }
-        #main-score { font-size: 3.5rem; font-weight: 900; color: #fff; text-shadow: 0 0 10px #00ffff; }
+        #main-score { font-size: 3.5rem; font-weight: 900; color: #fff; }
 
-        #loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 300; }
+        #loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 600; }
     </style>
 </head>
 <body>
 
-<div id="loader"><p style="color:#00ffff; letter-spacing:2px;">ЗАГРУЗКА РЕКОРД-СИСТЕМЫ...</p></div>
+<div id="language-screen">
+    <h1 style="color: #00ffff; letter-spacing: 6px; margin-bottom: 30px;">MEDSPORT</h1>
+    <div class="lang-grid">
+        <button class="lang-btn" onclick="selectLanguage('az')">AZ</button>
+        <button class="lang-btn" onclick="selectLanguage('ru')">RU</button>
+        <button class="lang-btn" onclick="selectLanguage('en')">EN</button>
+        <button class="lang-btn" onclick="selectLanguage('tr')">TR</button>
+    </div>
+</div>
 
-<div class="super-container" id="main-container" style="display: none;">
+<div id="loader"><p style="color:#00ffff; font-weight:900;">ЗАГРУЗКА AI...</p></div>
+
+<div class="super-container" id="main-container">
     <header><h1>MEDSPORT</h1></header>
 
     <aside class="panel">
         <div class="item-card" id="card-happy" onclick="setTarget('happy')">
-            <div class="item-emoji">😊</div><div class="item-name">Радость</div>
-            <div class="progress-bar-container">
-                <div class="progress-bar-fill" id="fill-happy"></div>
-                <div class="record-marker" id="mark-happy"></div>
-            </div>
+            <div class="item-emoji">😊</div><div class="item-name" id="txt-happy">Радость</div>
+            <div class="progress-bar-container"><div class="progress-bar-fill" id="fill-happy"></div><div class="record-marker" id="mark-happy"></div></div>
         </div>
         <div class="item-card" id="card-sad" onclick="setTarget('sad')">
-            <div class="item-emoji">☹️</div><div class="item-name">Грусть</div>
-            <div class="progress-bar-container">
-                <div class="progress-bar-fill" id="fill-sad"></div>
-                <div class="record-marker" id="mark-sad"></div>
-            </div>
+            <div class="item-emoji">☹️</div><div class="item-name" id="txt-sad">Грусть</div>
+            <div class="progress-bar-container"><div class="progress-bar-fill" id="fill-sad"></div><div class="record-marker" id="mark-sad"></div></div>
         </div>
         <div class="item-card" id="card-surprised" onclick="setTarget('surprised')">
-            <div class="item-emoji">😲</div><div class="item-name">Удивление</div>
-            <div class="progress-bar-container">
-                <div class="progress-bar-fill" id="fill-surprised"></div>
-                <div class="record-marker" id="mark-surprised"></div>
-            </div>
+            <div class="item-emoji">😲</div><div class="item-name" id="txt-surprised">Удивление</div>
+            <div class="progress-bar-container"><div class="progress-bar-fill" id="fill-surprised"></div><div class="record-marker" id="mark-surprised"></div></div>
         </div>
         <div class="item-card" id="card-angry" onclick="setTarget('angry')">
-            <div class="item-emoji">😠</div><div class="item-name">Гнев</div>
-            <div class="progress-bar-container">
-                <div class="progress-bar-fill" id="fill-angry"></div>
-                <div class="record-marker" id="mark-angry"></div>
-            </div>
+            <div class="item-emoji">😠</div><div class="item-name" id="txt-angry">Гнев</div>
+            <div class="progress-bar-container"><div class="progress-bar-fill" id="fill-angry"></div><div class="record-marker" id="mark-angry"></div></div>
         </div>
     </aside>
 
@@ -110,44 +117,47 @@
 
     <aside class="panel">
         <div class="item-card motion-item" id="card-no" onclick="setTarget('no')">
-            <div class="item-emoji">↔️</div><div class="item-name">Нет</div>
-            <div class="progress-bar-container">
-                <div class="progress-bar-fill" id="fill-no"></div>
-                <div class="record-marker" id="mark-no"></div>
-            </div>
+            <div class="item-emoji">↔️</div><div class="item-name" id="txt-no">Нет</div>
+            <div class="progress-bar-container"><div class="progress-bar-fill" id="fill-no"></div><div class="record-marker" id="mark-no"></div></div>
         </div>
         <div class="item-card motion-item" id="card-yes" onclick="setTarget('yes')">
-            <div class="item-emoji">↕️</div><div class="item-name">Да</div>
-            <div class="progress-bar-container">
-                <div class="progress-bar-fill" id="fill-yes"></div>
-                <div class="record-marker" id="mark-yes"></div>
-            </div>
+            <div class="item-emoji">↕️</div><div class="item-name" id="txt-yes">Да</div>
+            <div class="progress-bar-container"><div class="progress-bar-fill" id="fill-yes"></div><div class="record-marker" id="mark-yes"></div></div>
         </div>
         <div class="item-card motion-item" id="card-roll" onclick="setTarget('roll')">
-            <div class="item-emoji">🔄</div><div class="item-name">Вращение</div>
-            <div class="progress-bar-container">
-                <div class="progress-bar-fill" id="fill-roll"></div>
-                <div class="record-marker" id="mark-roll"></div>
-            </div>
+            <div class="item-emoji">🔄</div><div class="item-name" id="txt-roll">Вращение</div>
+            <div class="progress-bar-container"><div class="progress-bar-fill" id="fill-roll"></div><div class="record-marker" id="mark-roll"></div></div>
         </div>
     </aside>
 
     <footer>
-        <button class="sys-btn reset-btn" onclick="resetAll()">СБРОСИТЬ РЕКОРДЫ</button>
+        <button class="sys-btn reset-btn" id="btn-reset" onclick="resetAll()">СБРОСИТЬ РЕКОРДЫ</button>
         <div id="score-frame"><div id="main-score">0%</div></div>
         <button class="sys-btn full-btn" onclick="toggleFullScreen()">FULLSCREEN</button>
     </footer>
 </div>
 
 <script>
-    let targetEmotion = null;
-    let aiInitialized = false;
+    const languages = {
+        'az': { happy: 'Sevinc', sad: 'Kədər', surprised: 'Təəccüb', angry: 'Qəzəb', no: 'Yox', yes: 'Hə', roll: 'Dövrə', reset: 'SIFIRLA' },
+        'ru': { happy: 'Радость', sad: 'Грусть', surprised: 'Удивление', angry: 'Гнев', no: 'Нет', yes: 'Да', roll: 'Вращение', reset: 'СБРОС РЕКОРДОВ' },
+        'en': { happy: 'Joy', sad: 'Sadness', surprised: 'Surprise', angry: 'Anger', no: 'No', yes: 'Yes', roll: 'Roll', reset: 'RESET RECORDS' },
+        'tr': { happy: 'Sevinç', sad: 'Üzüntü', surprised: 'Şaşkınlık', angry: 'Öfke', no: 'Hayır', yes: 'Evet', roll: 'Dönme', reset: 'SIFIRLA' }
+    };
+
+    let targetEmotion = null, aiInitialized = false, isCalibrating = true;
     let offsets = { yaw: 0, pitch: 0, roll: 0 };
-    let isCalibrating = true;
     let records = { happy: 0, sad: 0, surprised: 0, angry: 0, no: 0, yes: 0, roll: 0 };
     const GOLDEN_SENS = 0.02;
 
-    window.onload = async () => { await initAI(); };
+    async function selectLanguage(lang) {
+        const dict = languages[lang];
+        ['happy', 'sad', 'surprised', 'angry', 'no', 'yes', 'roll'].forEach(k => document.getElementById(`txt-${k}`).innerText = dict[k]);
+        document.getElementById('btn-reset').innerText = dict.reset;
+        document.getElementById('language-screen').style.display = 'none';
+        document.getElementById('loader').style.display = 'flex';
+        await initAI();
+    }
 
     async function initAI() {
         try {
@@ -169,14 +179,9 @@
     }
 
     function resetAll() {
-        // Сбрасываем рекорды в ноль
         records = { happy: 0, sad: 0, surprised: 0, angry: 0, no: 0, yes: 0, roll: 0 };
-        Object.keys(records).forEach(id => {
-            const marker = document.getElementById(`mark-${id}`);
-            if(marker) marker.style.left = '0%';
-        });
-        isCalibrating = true; // Перекалибровка текущей позы
-        document.getElementById('main-score').innerText = '0%';
+        Object.keys(records).forEach(id => { document.getElementById(`mark-${id}`).style.left = '0%'; });
+        isCalibrating = true;
     }
 
     function setTarget(id) {
@@ -199,19 +204,11 @@
             
             if (detections && detections.length > 0) {
                 const land = detections[0].landmarks;
-                const nose = land.getNose();
-                const jaw = land.getJawOutline();
-                const lEye = land.getLeftEye();
-                const rEye = land.getRightEye();
+                const rYaw = (land.getNose()[0].x - (land.getJawOutline()[0].x + land.getJawOutline()[16].x)/2);
+                const rPitch = (land.getNose()[3].y - (land.getLeftEye()[0].y + land.getRightEye()[3].y)/2);
+                const rRoll = (land.getLeftEye()[0].y - land.getRightEye()[3].y);
 
-                const rYaw = (nose[0].x - (jaw[0].x + jaw[16].x)/2);
-                const rPitch = (nose[3].y - (lEye[0].y + rEye[3].y)/2);
-                const rRoll = (lEye[0].y - rEye[3].y);
-
-                if (isCalibrating) {
-                    offsets = { yaw: rYaw, pitch: rPitch, roll: rRoll };
-                    isCalibrating = false;
-                }
+                if (isCalibrating) { offsets = { yaw: rYaw, pitch: rPitch, roll: rRoll }; isCalibrating = false; }
 
                 const motions = {
                     'no': Math.abs(rYaw - offsets.yaw) * GOLDEN_SENS,
@@ -219,23 +216,15 @@
                     'roll': Math.abs(rRoll - offsets.roll) * GOLDEN_SENS
                 };
 
-                const expr = detections[0].expressions;
-
                 ['happy', 'sad', 'surprised', 'angry', 'no', 'yes', 'roll'].forEach(id => {
-                    let val = (['no', 'yes', 'roll'].includes(id)) ? motions[id] : expr[id];
-                    const deadZone = 0.08; 
-                    val = (val < deadZone) ? 0 : (val - deadZone) / (1 - deadZone);
+                    let val = (['no', 'yes', 'roll'].includes(id)) ? motions[id] : detections[0].expressions[id];
+                    val = (val < 0.08) ? 0 : (val - 0.08) / (1 - 0.08);
                     let result = Math.min(100, Math.round(val * 100));
 
-                    // Текущая полоска
-                    const fill = document.getElementById(`fill-${id}`);
-                    if(fill) fill.style.width = result + '%';
-
-                    // МАРКЕР РЕКОРДА
+                    document.getElementById(`fill-${id}`).style.width = result + '%';
                     if (result > records[id]) {
                         records[id] = result;
-                        const marker = document.getElementById(`mark-${id}`);
-                        if(marker) marker.style.left = result + '%';
+                        document.getElementById(`mark-${id}`).style.left = result + '%';
                     }
 
                     if (id === targetEmotion) {
